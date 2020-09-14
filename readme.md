@@ -18,20 +18,20 @@ ideally this program could run on my phone inside the termux environment...
  
 # C 
 
-main
-	1. run initial setup
-	2. parse args??
-	3. run menu function...
-	4. start the typing environment
+## main
+1. run initial setup
+2. parse args??
+3. run menu function...
+4. start the typing environment
 	
 should I parse args, or just have a menu...
 I think just making a menu is the easiest way to go...
 
-menu:
+## menu:
 	list text source files in folder
 	take a selection from the user and return the file pointer to the main function
 	
-typing:
+## typing:
 	will be the main environment managing the local buffer
 	reading from the file, both progress and typing text.
 	saving progress to a file
