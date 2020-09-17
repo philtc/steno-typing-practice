@@ -106,15 +106,23 @@ class Typing():
             if self.progress['char'] != 0:
                 self.printProgress(line)
                 
-
             self.textWin.noutrefresh()
             curses.doupdate()
         
-            for char in line[self.progress['char']:-1]:
-                # If this is the last char in the line, save the speed stats so that the typist can look at the screen before the next paragraph
-                if self.progress['char'] == len(line) - 2:
+            for char in line[self.progress['char']:]:
+                # If this is the last char in the line,
+                # save the speed stats so that the typist can look at the screen before the next paragraph
+                if self.progress['char'] == len(line) - 1:
                     self.writeInfo()
                     
+                # Because we used textwrap, we may have \n in our line
+                if char == '\n':
+                    self.textWin.addch('\n')
+                    self.textWin.noutrefresh()
+                    curses.doupdate()
+                    self.progress['char'] = self.progress['char'] + 1
+                    continue
+                
                 typo = False
                 while self.textWin.getkey() != char:
                     typo = True
@@ -161,8 +169,9 @@ class Typing():
                 self.resetProgress()
                 self.file.seek(0)
                 line = self.file.readline()
-                return (line, True)
-            return (line, False)
+            else:
+                return (line, False)
+        line = ' \n'.join(textwrap.wrap(line,curses.COLS - 3))
         return (line, True)
 
         
@@ -188,8 +197,8 @@ class Typing():
         info['words'] = self.progress['words']
         info['errors'] = len(self.progress['errors']) - self.progress['oldErrors']
         info['accuracy'] = round(self.getAccuracy(), 2)
-        info['CPM'] = self.getCPM()
-        info['WPM'] = self.getWPM()
+        info['CPM'] = round(self.getCPM(), 2)
+        info['WPM'] = round(self.getWPM(), 2)
         info['time'] = round(time.time() - self.progress['startTime'], 3)
         
         with open(self.fileName + '.speed', 'a') as f:
@@ -204,11 +213,11 @@ class Typing():
 
 
     def getCPM(self):
-        return int((self.progress['char'] - self.progress['oldChars']) // ((time.time() - self.progress['startTime']) / 60))
+        return (self.progress['char'] - self.progress['oldChars']) / ((time.time() - self.progress['startTime']) / 60)
 
     
     def getWPM(self):
-        return int(self.progress['words'] // ((time.time() - self.progress['startTime']) / 60))
+        return self.progress['words'] / ((time.time() - self.progress['startTime']) / 60)
 
     
     def printInfoStatic(self):
@@ -236,8 +245,8 @@ class Typing():
         
         self.infoWin.addstr(0, self.infoHalf + 11, '{:05.2f}%'.format(self.getAccuracy()))
         self.infoWin.addstr(1, self.infoHalf + 11, time.strftime("%M:%S", time.gmtime(time.time() - self.progress['startTime'])))
-        self.infoWin.addstr(2, self.infoHalf + 11, '{:03d}'.format(self.getCPM()))
-        self.infoWin.addstr(3, self.infoHalf + 11, '{:03d}'.format(self.getWPM()))
+        self.infoWin.addstr(2, self.infoHalf + 11, '{:03.0f}'.format(self.getCPM()))
+        self.infoWin.addstr(3, self.infoHalf + 11, '{:03.0f}'.format(self.getWPM()))
                             
         # Set the cursor position back to what it was before we added some text
         self.textWin.move(y,x)
