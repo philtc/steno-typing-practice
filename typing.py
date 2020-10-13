@@ -13,11 +13,9 @@ class Typing():
     def __init__(self):
         pass
 
-    
     def start(self):
         curses.wrapper(self._start)
 
-        
     def _start(self, stdscr):
         ## initilize the curses environment, and create our windows
         stdscr.clear()
@@ -124,8 +122,10 @@ class Typing():
                     continue
                 
                 typo = False
-                while self.textWin.getkey() != char:
+                while (key := self.textWin.getkey()) != char:
                     typo = True
+		    if key == '\x1b':
+			raise KeyboardInterrupt('Escape closed the program')
                 if typo:
                     style = curses.A_STANDOUT
                     self.progress['errors'].append(self.progress['char'])
@@ -213,11 +213,11 @@ class Typing():
 
 
     def getCPM(self):
-        return (self.progress['char'] - self.progress['oldChars']) / ((time.time() - self.progress['startTime']) / 60)
+        return (self.progress['char'] - self.progress['oldChars']) / ((time.time() - self.progress['startTime'] + 0.001) / 60)
 
     
     def getWPM(self):
-        return self.progress['words'] / ((time.time() - self.progress['startTime']) / 60)
+        return self.progress['words'] / ((time.time() - self.progress['startTime'] + 0.001) / 60)
 
     
     def printInfoStatic(self):
