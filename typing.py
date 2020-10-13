@@ -21,6 +21,12 @@ class Typing():
         stdscr.clear()
         self.infoWin = curses.newwin(5, curses.COLS - 1, 0, 0)
         self.textWin = curses.newwin(curses.LINES - 6, curses.COLS - 1, 6, 0)
+
+        # These two lines will allow full escape sequences to be read in by getkey
+        # and will reduce the delay to 1ms for pressing ESC key
+        self.textWin.keypad(True)
+        #curses.set_escdelay(1) # TODO: Uncomment this when 3.9 is released for Arch
+        
         self.infoHalf = curses.COLS // 2
 
         self.printInfoStatic()
@@ -124,8 +130,8 @@ class Typing():
                 typo = False
                 while (key := self.textWin.getkey()) != char:
                     typo = True
-		    if key == '\x1b':
-			raise KeyboardInterrupt('Escape closed the program')
+                    if key == '\x1b':
+                        raise KeyboardInterrupt('Escape closed the program')
                 if typo:
                     style = curses.A_STANDOUT
                     self.progress['errors'].append(self.progress['char'])
