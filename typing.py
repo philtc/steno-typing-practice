@@ -69,7 +69,7 @@ class Typing():
         else:
             self.textWin.addstr(2,0,'Did not find a progress file, starting from the begining')
             self.resetProgress()
-            
+
         ## read ahead in the practice text to the current position as defined in the progress dict
         for i in range(self.progress['line']):
             # Its totally okay if we read off the end of the file
@@ -101,6 +101,9 @@ class Typing():
             self.progress['oldChars'] = self.progress['char']
             self.progress['oldErrors'] = len(self.progress['errors'])
             self.progress['words'] = 0
+            # This will be an array detailing which letters I miss
+            self.progress['typos'] = [0] * 256
+            self.progress['charFreq'] = [0] * 256
             self.printInfoDynamic()
 
             self.textWin.clear()
@@ -132,17 +135,20 @@ class Typing():
                     typo = True
                     if key == '\x1b':
                         raise KeyboardInterrupt('Escape closed the program')
+                    
                 if typo:
                     style = curses.A_STANDOUT
                     self.progress['errors'].append(self.progress['char'])
+                    self.progress['typos'][ord(key)] = self.progress['typos'][ord(key)] + 1
                 else:
                     style = curses.A_BOLD
                 
                 self.progress['char'] = self.progress['char'] + 1
-
+                self.progress['charFreq'][ord(key)] = self.progress['charFreq'][ord(key)] + 1
+                
                 if char == ' ':
                     self.progress['words'] = self.progress['words'] + 1
-                
+
                 self.textWin.addch(char, style)
                 
                 # print some things to the info window
@@ -205,7 +211,9 @@ class Typing():
         info['accuracy'] = round(self.getAccuracy(), 2)
         info['CPM'] = round(self.getCPM(), 2)
         info['WPM'] = round(self.getWPM(), 2)
-        info['time'] = round(time.time() - self.progress['startTime'], 3)
+        info['time'] = round(time.time() - self.progress['startTime'], 3)            
+        info['charFreq'] = self.progress['charFreq']
+        info['typos'] = self.progress['typos']
         
         with open(self.fileName + '.speed', 'a') as f:
             json.dump(info, f)
@@ -253,6 +261,7 @@ class Typing():
         self.infoWin.addstr(1, self.infoHalf + 11, time.strftime("%M:%S", time.gmtime(time.time() - self.progress['startTime'])))
         self.infoWin.addstr(2, self.infoHalf + 11, '{:03.0f}'.format(self.getCPM()))
         self.infoWin.addstr(3, self.infoHalf + 11, '{:03.0f}'.format(self.getWPM()))
+
                             
         # Set the cursor position back to what it was before we added some text
         self.textWin.move(y,x)
