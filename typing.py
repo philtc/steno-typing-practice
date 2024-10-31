@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
-# Isaiah Grace
-# 17 Sep 2020
+# Forked from https://github.com/IsaiahGrace/typing-practice
+# by PTX0 2024
 
 import os
 import json
@@ -9,18 +9,20 @@ import curses
 import time
 import textwrap
 
+steno = True
+
 class Typing():
     def __init__(self):
         pass
 
     def start(self):
         curses.wrapper(self._start)
-
+ 
     def _start(self, stdscr):
         ## initilize the curses environment, and create our windows
         stdscr.clear()
         self.infoWin = curses.newwin(5, curses.COLS - 1, 0, 0)
-        self.textWin = curses.newwin(curses.LINES - 6, curses.COLS - 1, 6, 0)
+        self.textWin = curses.newwin(curses.LINES - 7, curses.COLS - 1, 6, 0)
 
         # These two lines will allow full escape sequences to be read in by getkey
         # and will reduce the delay to 1ms for pressing ESC key
@@ -92,6 +94,7 @@ class Typing():
 
     def typingLoop(self):
         typing = True
+        clearLast = False
         while(typing):
             line, typing = self.readLine()
             if not typing:
@@ -101,6 +104,7 @@ class Typing():
             self.progress['oldChars'] = self.progress['char']
             self.progress['oldErrors'] = len(self.progress['errors'])
             self.progress['words'] = 0
+            self.progress['sword'] = ''
             # This will be an array detailing which letters I miss
             self.progress['typos'] = [0] * 256
             self.progress['charFreq'] = [0] * 256
@@ -130,24 +134,42 @@ class Typing():
                     self.progress['char'] = self.progress['char'] + 1
                     continue
                 
+                if clearLast:
+                    self.progress['sword'] = ''
+                    clearLast = False
                 typo = False
                 while (key := self.textWin.getkey()) != char:
-                    typo = True
+                    # typo = True
                     if key == '\x1b':
                         raise KeyboardInterrupt('Escape closed the program')
+                    if key in ('\x7f', '\b', 'KEY_BACKSPACE'):
+                        self.progress['sword'] = self.progress['sword'][:-1]
+                    else:
+                        self.progress['sword'] += key
+                    if key in (ord('\t'), '   ', '\t'):
+                        typo = True
+                        # self.textWin.addch(char, curses.A_UNDERLINE)
+                        # self.progress['char'] = self.progress['char'] + 1
+                        break
+                    self.printInfoDynamic()
+                    self.textWin.noutrefresh()
+                    curses.doupdate()
                     
                 if typo:
-                    style = curses.A_STANDOUT
+                    style = curses.A_UNDERLINE
                     self.progress['errors'].append(self.progress['char'])
                     self.progress['typos'][ord(key)] = self.progress['typos'][ord(key)] + 1
                 else:
-                    style = curses.A_BOLD
-                
+                    style = curses.A_DIM
+
+                self.progress['sword'] += key
                 self.progress['char'] = self.progress['char'] + 1
                 self.progress['charFreq'][ord(key)] = self.progress['charFreq'][ord(key)] + 1
                 
                 if char == ' ':
                     self.progress['words'] = self.progress['words'] + 1
+                    # self.progress['sword'] += key,
+                    clearLast = True
 
                 self.textWin.addch(char, style)
                 
@@ -193,6 +215,7 @@ class Typing():
                          'oldChars': 0,
                          'words': 0,
                          'errors': [],
+                         'sword': '',
                          'startTime': 0
                          }
         
@@ -239,6 +262,7 @@ class Typing():
         self.infoWin.addstr(0, 0, 'Paragraph:')
         self.infoWin.addstr(1, 0, 'Character:')
         self.infoWin.addstr(2, 0, 'Errors   :')
+        self.infoWin.addstr(4, 0, 'Last word: ')
         
         # The right column of info:
         self.infoWin.addstr(0, self.infoHalf, 'Accuracy:')
@@ -256,6 +280,7 @@ class Typing():
         self.infoWin.addstr(0, 12, '{:03d}'.format(self.progress['line']))
         self.infoWin.addstr(1, 12, '{:03d}'.format(self.progress['char']))
         self.infoWin.addstr(2, 12, '{:03d}'.format(len(self.progress['errors'])))
+        self.infoWin.addstr(4, 12, self.progress['sword'].ljust(23))
         
         self.infoWin.addstr(0, self.infoHalf + 11, '{:05.2f}%'.format(self.getAccuracy()))
         self.infoWin.addstr(1, self.infoHalf + 11, time.strftime("%M:%S", time.gmtime(time.time() - self.progress['startTime'])))
@@ -268,13 +293,12 @@ class Typing():
         self.infoWin.noutrefresh()
         self.textWin.noutrefresh()
 
-
     def printProgress(self, line):
         for i, char in enumerate(line[:self.progress['char']]):
             if i in self.progress['errors']:
-                style = curses.A_STANDOUT
+                style = curses.A_UNDERLINE
             else:
-                style = curses.A_BOLD
+                style = curses.A_DIM
             self.textWin.addch(char, style)
 
 

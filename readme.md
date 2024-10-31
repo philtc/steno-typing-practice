@@ -1,3 +1,19 @@
+This is a fork of Isaiah Grace's typing practice program.
+The changes in this repo are designed for practicing typing with stenography.
+
+Features (from original):
+- Long-form typing based on written text of your choosing
+- Offline
+- Very few dependancies
+- Text User Interface (TUI)
+- The cursor highlights the current position
+
+Updates:
+- Typos are no longer shown
+- Last word typed is displayed for visual feedback (useful for multi stroke words)
+- Characters can be 'skipped' by pressing (or chording) the TAB key
+- Typed text is dimmed
+
 # typing-practice
 This is a very simple curses based typing practice program. Supply a source text and then type it our paragraph by paragraph to practice touch-typing. I wrote this myself because the web-based ones didn't have good support for typing out long source texts (like full books), and I wanted to play around with curses.
 
