@@ -1,3 +1,5 @@
+ ![Screenshot](/img/main-1.png)
+
 This is a fork of Isaiah Grace's typing practice program.
 The changes in this repo are designed for practicing typing with stenography.
 
