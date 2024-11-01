@@ -135,11 +135,18 @@ class Typing():
                     continue
                 
                 if clearLast:
+                    y,x = self.textWin.getyx()
                     self.progress['sword'] = ''
+                    self.infoWin.addstr(4, 12, ' ')
+                    self.infoWin.clrtoeol()
+                    self.infoWin.noutrefresh()
+                    self.textWin.move(y,x)
                     clearLast = False
                 typo = False
                 while (key := self.textWin.getkey()) != char:
                     # typo = True
+                    if key == '\n':
+                        continue
                     if key == '\x1b':
                         raise KeyboardInterrupt('Escape closed the program')
                     if key in ('\x7f', '\b', 'KEY_BACKSPACE'):
