@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pprint as pp
 
-files = [f for f in os.listdir() if f[-6:] == '.speed']
+files = [f for f in os.listdir('books') if f[-6:] == '.speed']
 
 if not files:
     print("No files with the .speed extension found")

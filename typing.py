@@ -35,7 +35,7 @@ class Typing():
         
         ## prompt user to select the practice text
         # find .txt files in the current directory
-        dirFiles = os.listdir()
+        dirFiles = os.listdir('books/')
         files = [f for f in dirFiles if f[-4:] == '.txt']
 
         if not files:
@@ -56,8 +56,8 @@ class Typing():
         curses.doupdate()
         choice = files[int(self.textWin.getkey()) - 1]
 
-        self.file = open(choice, 'r')
-        self.fileName = choice
+        self.file = open('books/' + choice, 'r')
+        self.fileName = 'books/' + choice
         self.progressFile = choice + '.progress'
         
         self.textWin.clear()
@@ -66,7 +66,7 @@ class Typing():
         ## read in a progress file, or start from beginning if none exists
         if self.progressFile in dirFiles:
             self.textWin.addstr(2,0,'Found progress file')
-            with open(self.progressFile,'r') as f:
+            with open('books/' + self.progressFile,'r') as f:
                 self.progress = json.load(f)
         else:
             self.textWin.addstr(2,0,'Did not find a progress file, starting from the begining')
