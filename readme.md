@@ -11,7 +11,6 @@ This is a simple terminal program for practicing typing with stenography.
 - Very few dependancies
 - Text User Interface (TUI)
 - Cursor highlights the current position
-- Typos not shown
 - Last word typed is displayed for visual feedback (useful for multi stroke words)
 - Characters can be 'skipped' by pressing (or chording) the TAB key
 - Typed text is dimmed
@@ -27,10 +26,10 @@ The main program requires:
 - numpy
 
 ## Usage
-Download this repository
-```git clone https://github.com/philtc/steno-typing-practice```
-Change to the directory you just downloaded
-```cd steno-typing-practice```
-(Optional) Put the source text you want to use in the books folder.
-Start the program
+Download this repository  
+```git clone https://github.com/philtc/steno-typing-practice```  
+Change to the directory you just downloaded  
+```cd steno-typing-practice```  
+(Optional) Put the source text you want to use in the books folder.  
+Start the program  
 ```python typing.py```
