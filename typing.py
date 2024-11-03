@@ -91,6 +91,15 @@ class Typing():
             # This finally makes sure that we always save the progress when exiting
             self.saveProgress()
         
+    def updateLastWord(self, entry):
+        y,x = self.textWin.getyx()
+        self.progress['sword'] = ''
+        self.infoWin.addstr(4, 12, entry)
+        self.infoWin.clrtoeol()
+        self.infoWin.noutrefresh()
+        self.textWin.move(y,x)
+        clearLast = False
+
 
     def typingLoop(self):
         typing = True
@@ -135,13 +144,8 @@ class Typing():
                     continue
                 
                 if clearLast:
-                    y,x = self.textWin.getyx()
-                    self.progress['sword'] = ''
-                    self.infoWin.addstr(4, 12, ' ')
-                    self.infoWin.clrtoeol()
-                    self.infoWin.noutrefresh()
-                    self.textWin.move(y,x)
-                    clearLast = False
+                    self.updateLastWord(' ')
+
                 typo = False
                 while (key := self.textWin.getkey()) != char:
                     # typo = True
@@ -153,6 +157,11 @@ class Typing():
                         self.progress['sword'] = self.progress['sword'][:-1]
                     else:
                         self.progress['sword'] += key
+                    if key == '\x10':
+                        wordUnderCursor = self.getWordUnderCursor()
+                        with open("savedWords.txt", "a") as wordfile:
+                            wordfile.write(wordUnderCursor + '\n')
+                        self.updateLastWord("*** " + wordUnderCursor + " ***")
                     if key in (ord('\t'), '   ', '\t'):
                         typo = True
                         # self.textWin.addch(char, curses.A_UNDERLINE)
@@ -177,6 +186,8 @@ class Typing():
                     self.progress['words'] = self.progress['words'] + 1
                     # self.progress['sword'] += key,
                     clearLast = True
+                else:
+                    clearLast = False
 
                 self.textWin.addch(char, style)
                 
@@ -228,7 +239,7 @@ class Typing():
         
             
     def saveProgress(self):
-        with open(self.progressFile, 'w') as f:
+        with open('books/' + self.progressFile, 'w') as f:
             json.dump(self.progress, f)
 
 
@@ -307,6 +318,30 @@ class Typing():
             else:
                 style = curses.A_DIM
             self.textWin.addch(char, style)
+
+    def getWordUnderCursor(self):
+        # Get the current cursor position
+        y, x = self.textWin.getyx()
+        
+        # Get the full line text from the window
+        line = self.textWin.instr(y, 0, curses.COLS).decode('utf-8').rstrip()
+        
+        # Find the start of the word by moving backward from the cursor position
+        start = x
+        while start > 0 and line[start - 1] not in (' ', '\t', '\n'):
+            start -= 1
+        
+        # Find the end of the word by moving forward from the cursor position
+        end = x
+        while end < len(line) and line[end] not in (' ', '\t', '\n'):
+            end += 1
+        
+        # Extract the word under the cursor
+        word = line[start:end]
+        # Set the cursor position back to what it was before we added some text
+        self.textWin.move(y,x)
+        return word
+
 
 
     
