@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python3
 
 import matplotlib.pyplot as plt
 import json
@@ -16,7 +16,7 @@ print('Please select a .speed file to plot')
 for idx, file in enumerate(files, start=1):
     print(idx, '-', file)
 
-choice = files[int(input()) - 1]
+choice = 'books/' + files[int(input()) - 1]
 
 data = []
 with open(choice,'r') as f:

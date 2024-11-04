@@ -1,5 +1,3 @@
-This is a fork of Isaiah Grace's typing practice program.
-
 # steno-typing-practice
 This is a simple terminal program for practicing long-form typing with stenography.
  ![Screenshot](/img/main-1.png)
@@ -18,12 +16,12 @@ This is a simple terminal program for practicing long-form typing with stenograp
 
 ## Dependancies
 The main program requires:
-- python 3
+- python3
 - ncurses
 
 (Optional) The freq and plot programs require:
-- matplotlib
-- numpy
+- python3-matplotlib
+- python3-numpy
 
 ## Usage
 Download this repository:  
