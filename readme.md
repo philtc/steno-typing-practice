@@ -33,7 +33,7 @@ Go to the new directory:
 (Optional) Put the source text you want to use in the books folder.  
   
 Start the program:  
-```python typing.py```  
+```python3 steno-typing.py```  
   
 Save difficult words by pressing ```CTRL-P```. These words will be saved to the savedWords.txt file.  
   
