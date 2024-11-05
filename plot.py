@@ -16,7 +16,7 @@ for idx, file in enumerate(files, start=1):
 choice = files[int(input()) - 1]
 
 data = []
-with open(choice,'r') as f:
+with open('books/' + choice,'r') as f:
     while (line := f.readline()):
         data.append(json.loads(line))
 
