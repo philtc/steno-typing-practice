@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 # Forked from https://github.com/IsaiahGrace/typing-practice
-# by PTX0 2024
+# by philtc 2024
 
 import os
 import json
@@ -46,20 +46,40 @@ class Typing():
             self.textWin.getkey()
             return
 
-        # prompt the user for a selection:
-        self.textWin.addstr(0,0,'Please select a practice text:')
-        for idx, file in enumerate(files, start=1):
-            self.textWin.addstr(idx , 0, str(idx) + ' - ' +  str(file))
+        while True:
+            self.textWin.clear()
+            self.textWin.addstr(0,0,'Please select a practice text:')
+            
+            # Display list of files with indices
+            for idx, file in enumerate(files, start=1):
+                self.textWin.addstr(idx , 0, str(idx) + ' - ' +  str(file))
+            
+            self.textWin.addstr(len(files) + 1, 0, 'enter a number:')
+            self.textWin.noutrefresh()
+            curses.doupdate()
 
-        self.textWin.addstr(len(files) + 1, 0, 'enter a number:')
-        self.textWin.noutrefresh()
-        curses.doupdate()
-        choice = files[int(self.textWin.getkey()) - 1]
+            try:
+                # Get user input and parse the choice
+                choice = files[int(self.textWin.getkey()) - 1]
 
-        self.file = open('books/' + choice, 'r')
-        self.fileName = 'books/' + choice
-        self.progressFile = choice + '.progress'
-        
+                # Attempt to open the selected file
+                self.file = open('books/' + choice, 'r')
+                self.fileName = 'books/' + choice
+                self.progressFile = choice + '.progress'
+                break
+            
+            except (ValueError, IndexError):
+                self.textWin.clear()
+                self.textWin.addstr(0, 0, "Invalid selection. Please enter a valid number.")
+                self.textWin.refresh()
+                self.textWin.getch()  # Wait for key press before retrying
+
+            except (FileNotFoundError, IOError) as e:
+                self.textWin.clear()
+                self.textWin.addstr(0, 0, f"Error opening file: {e}")
+                self.textWin.refresh()
+                self.textWin.getch()  # Wait for key press before retrying
+
         self.textWin.clear()
         self.textWin.addstr(0, 0, 'Using ' + choice + ' as practice text')
         
