@@ -1,6 +1,7 @@
 # steno-typing-practice
 This is a simple terminal program for practicing long-form typing with stenography.
- ![Screenshot](/img/main-1.png)
+ ![Screenshot1](/img/main-1.png)
+ ![Screenshot2](/img/plot-image-1.png)
 
 ## Features
 - Long-form typing (e.g. novels, books etc you can add yourself)
@@ -19,7 +20,7 @@ The main program requires:
 - python3
 - ncurses
 
-(Optional) The freq and plot programs require:
+(Optional) The plot programs require:
 - python3-matplotlib
 - python3-numpy
 
@@ -38,3 +39,6 @@ Start the program:
 Save difficult words by pressing ```CTRL-P```. These words will be saved to the savedWords.txt file.  
   
 Exit with the ```esc``` key.
+
+To see a graph of your speed:
+```python3 plot.py```  
