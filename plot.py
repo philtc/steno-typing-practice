@@ -36,7 +36,7 @@ ax = fig.add_subplot(1,1,1)
 ax.plot(x, y, '.', color='grey')
 
 # Plot error points in red
-# ax.plot(x, z, color='#555555', label='Error')
+# ax.plot(x, z, '.r', label='Error')
 
 m, b = np.polyfit(x, y, 1)
 y_fit = [m * xi + b for xi in x]
@@ -44,8 +44,8 @@ y_fit = [m * xi + b for xi in x]
 # Plot blue trend line
 ax.plot(x, y_fit, 'b-', label='Trend Line')
 
-plt.xlabel('Line')
-plt.ylabel('Error/WPM')
+plt.xlabel('Line in text')
+plt.ylabel('WPM', color='blue')
 
 plt.ylim((0,100))
 
