@@ -120,7 +120,6 @@ class Typing():
         self.textWin.move(y,x)
         clearLast = False
 
-
     def typingLoop(self):
         typing = True
         clearLast = False
@@ -178,10 +177,13 @@ class Typing():
                     else:
                         self.progress['sword'] += key
                     if key == '\x10':
-                        wordUnderCursor = self.getWordUnderCursor()
+                        wordUnderCursor, dist = self.getWordUnderCursor()
                         with open("savedWords.txt", "a") as wordfile:
                             wordfile.write(wordUnderCursor + '\n')
                         self.updateLastWord("*** " + wordUnderCursor + " ***")
+                        # FIXME the character under cusor is not the next expected
+                        # self.progress['sword'] = str(line[self.progress['char']])
+                        # break
                     if key in (ord('\t'), '   ', '\t'):
                         typo = True
                         self.updateLastWord(' ')
@@ -198,12 +200,11 @@ class Typing():
                     style = curses.A_DIM
 
                 self.progress['sword'] += key
-                self.progress['char'] = self.progress['char'] + 1
-                self.progress['charFreq'][ord(key)] = self.progress['charFreq'][ord(key)] + 1
+                self.progress['char'] += 1
+                # self.progress['charFreq'][ord(key)] = self.progress['charFreq'][ord(key)] + 1
                 
                 if char == ' ':
                     self.progress['words'] = self.progress['words'] + 1
-                    # self.progress['sword'] += key,
                     clearLast = True
                 else:
                     clearLast = False
@@ -339,7 +340,6 @@ class Typing():
             self.textWin.addch(char, style)
 
     def getWordUnderCursor(self):
-        # Get the current cursor position
         y, x = self.textWin.getyx()
         
         # Get the full line text from the window
@@ -357,12 +357,14 @@ class Typing():
         
         # Extract the word under the cursor
         word = line[start:end]
-        # Set the cursor position back to what it was before we added some text
-        self.textWin.move(y,x)
-        return word
+        distance = (end - x)
+        # self.progress['char'] += distance
+        self.textWin.move(y, start)
+        self.textWin.addstr(line[start:end], curses.A_REVERSE)
 
-
-
+        #self.textWin.move(y,end)
+        self.textWin.move(y, x)
+        return word, distance
     
 if __name__ == '__main__':
     typing = Typing()
