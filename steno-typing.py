@@ -154,7 +154,6 @@ class Typing():
                 if self.progress['char'] == len(line) - 1:
                     self.writeInfo()
                     
-                # Because we used textwrap, we may have \n in our line
                 if char == '\n':
                     self.textWin.addch('\n')
                     self.textWin.noutrefresh()
@@ -167,7 +166,6 @@ class Typing():
 
                 typo = False
                 while (key := self.textWin.getkey()) != char:
-                    # typo = True
                     if key == '\n':
                         continue
                     if key == '\x1b':
@@ -177,13 +175,13 @@ class Typing():
                     else:
                         self.progress['sword'] += key
                     if key == '\x10':
-                        wordUnderCursor, dist = self.getWordUnderCursor()
+                        wordUnderCursor, remainder = self.getWordUnderCursor()
                         with open("savedWords.txt", "a") as wordfile:
                             wordfile.write(wordUnderCursor + '\n')
-                        self.updateLastWord("*** " + wordUnderCursor + " ***")
-                        # FIXME the character under cusor is not the next expected
-                        # self.progress['sword'] = str(line[self.progress['char']])
-                        # break
+                        self.progress['sword'] = 'Saved *** ' + wordUnderCursor + ' ***'
+                        clearLast = True
+                        #for letter in remainder:
+                            #self.goOn(False, letter, letter, True)
                     if key in (ord('\t'), '   ', '\t'):
                         typo = True
                         self.updateLastWord(' ')
@@ -192,30 +190,7 @@ class Typing():
                     self.textWin.noutrefresh()
                     curses.doupdate()
                     
-                if typo:
-                    style = curses.A_UNDERLINE
-                    self.progress['errors'].append(self.progress['char'])
-                    self.progress['typos'][ord(key)] = self.progress['typos'][ord(key)] + 1
-                else:
-                    style = curses.A_DIM
-
-                self.progress['sword'] += key
-                self.progress['char'] += 1
-                # self.progress['charFreq'][ord(key)] = self.progress['charFreq'][ord(key)] + 1
-                
-                if char == ' ':
-                    self.progress['words'] = self.progress['words'] + 1
-                    clearLast = True
-                else:
-                    clearLast = False
-
-                self.textWin.addch(char, style)
-                
-                # print some things to the info window
-                self.printInfoDynamic()
-            
-                self.textWin.noutrefresh()
-                curses.doupdate()
+                self.goOn(typo, key, char, False)
 
             # We've completed a line, reflect this in the progress dict    
             self.progress['line'] = self.progress['line'] + 1
@@ -339,6 +314,33 @@ class Typing():
                 style = curses.A_DIM
             self.textWin.addch(char, style)
 
+    def goOn(self, typo, key, char, rev):
+        if typo:
+            style = curses.A_UNDERLINE
+            self.progress['errors'].append(self.progress['char'])
+            self.progress['typos'][ord(key)] = self.progress['typos'][ord(key)] + 1
+        elif rev:
+            style = curses.A_REVERSE
+        else:
+            style = curses.A_DIM
+
+        self.progress['sword'] += key
+        self.progress['char'] += 1
+        
+        if char == ' ':
+            self.progress['words'] = self.progress['words'] + 1
+            clearLast = True
+        else:
+            clearLast = False
+
+        self.textWin.addch(char, style)
+        
+        # print some things to the info window
+        self.printInfoDynamic()
+    
+        self.textWin.noutrefresh()
+        curses.doupdate()
+
     def getWordUnderCursor(self):
         y, x = self.textWin.getyx()
         
@@ -357,14 +359,14 @@ class Typing():
         
         # Extract the word under the cursor
         word = line[start:end]
-        distance = (end - x)
-        # self.progress['char'] += distance
         self.textWin.move(y, start)
+        #self.textWin.addstr(line[start:x], curses.A_REVERSE)
         self.textWin.addstr(line[start:end], curses.A_REVERSE)
+        self.textWin.move(y, x)
+        remainder = line[x:end]
 
         #self.textWin.move(y,end)
-        self.textWin.move(y, x)
-        return word, distance
+        return word, remainder
     
 if __name__ == '__main__':
     typing = Typing()
