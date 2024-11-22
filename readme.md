@@ -13,7 +13,8 @@ This is a simple terminal program for practicing long-form typing with stenograp
 - Characters can be 'skipped' by pressing (or chording) the tab key
 - Typed text is dimmed
 - Skipped characters are underlined
-- Difficult words can be saved to a text file
+- Words can be skipped and saved to a text file
+- Graph your speed
 
 ## Dependancies
 The main program requires:
@@ -36,9 +37,11 @@ Go to the new directory:
 Start the program:  
 ```python3 steno-typing.py```  
   
-Save difficult words by pressing ```CTRL-P```. These words will be saved to the savedWords.txt file.  
+Skip characters with ```TAB```.  
+Skip and save difficult words by pressing ```CTRL-P```.  
+These words will be saved to the savedWords.txt file.  
   
 Exit with the ```esc``` key.
 
-To see a graph of your speed:
+To see a graph of your speed:  
 ```python3 plot.py```  
