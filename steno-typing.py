@@ -148,22 +148,23 @@ class Typing():
             self.textWin.noutrefresh()
             curses.doupdate()
         
-            for char in line[self.progress['char']:]:
+            line_length = len(line)
+            while self.progress['char'] < line_length:
+                char = line[self.progress['char']]
                 # If this is the last char in the line,
                 # save the speed stats so that the typist can look at the screen before the next paragraph
-                if self.progress['char'] == len(line) - 1:
+                if self.progress['char'] == line_length - 1:
                     self.writeInfo()
                     
                 if char == '\n':
                     self.textWin.addch('\n')
                     self.textWin.noutrefresh()
                     curses.doupdate()
-                    self.progress['char'] = self.progress['char'] + 1
+                    self.progress['char'] += 1
                     continue
-                
+
                 if clearLast:
                     self.updateLastWord(' ')
-
                 typo = False
                 while (key := self.textWin.getkey()) != char:
                     if key == '\n':
@@ -179,9 +180,10 @@ class Typing():
                         with open("savedWords.txt", "a") as wordfile:
                             wordfile.write(wordUnderCursor + '\n')
                         self.progress['sword'] = 'Saved *** ' + wordUnderCursor + ' ***'
+                        self.progress['char'] += remainder
+                        char = ' '
                         clearLast = True
-                        #for letter in remainder:
-                            #self.goOn(False, letter, letter, True)
+                        continue
                     if key in (ord('\t'), '   ', '\t'):
                         typo = True
                         self.updateLastWord(' ')
@@ -362,8 +364,8 @@ class Typing():
         self.textWin.move(y, start)
         #self.textWin.addstr(line[start:x], curses.A_REVERSE)
         self.textWin.addstr(line[start:end], curses.A_REVERSE)
-        self.textWin.move(y, x)
-        remainder = line[x:end]
+        self.textWin.move(y, end)
+        remainder = (end - x)
 
         #self.textWin.move(y,end)
         return word, remainder
