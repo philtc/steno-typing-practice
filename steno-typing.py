@@ -118,11 +118,11 @@ class Typing():
         self.infoWin.clrtoeol()
         self.infoWin.noutrefresh()
         self.textWin.move(y,x)
-        clearLast = False
+        self.progress['clearLast'] = False
 
     def typingLoop(self):
         typing = True
-        clearLast = False
+        self.progress['clearLast'] = False
         while(typing):
             line, typing = self.readLine()
             if not typing:
@@ -133,8 +133,9 @@ class Typing():
             self.progress['oldErrors'] = len(self.progress['errors'])
             self.progress['words'] = 0
             self.progress['sword'] = ''
+            self.progress['clearLast'] = False
             # This will be an array detailing which letters I miss
-            self.progress['typos'] = [0] * 256
+            self.progress['skips'] = [0] * 256
             self.progress['charFreq'] = [0] * 256
             self.printInfoDynamic()
 
@@ -163,9 +164,7 @@ class Typing():
                     self.progress['char'] += 1
                     continue
 
-                if clearLast:
-                    self.updateLastWord(' ')
-                typo = False
+                skip = False
                 while (key := self.textWin.getkey()) != char:
                     if key == '\n':
                         continue
@@ -182,17 +181,17 @@ class Typing():
                         self.progress['sword'] = 'Saved *** ' + wordUnderCursor + ' ***'
                         self.progress['char'] += remainder
                         char = ' '
-                        clearLast = True
+                        self.progress['clearLast'] = True
                         continue
                     if key in (ord('\t'), '   ', '\t'):
-                        typo = True
+                        skip = True
                         self.updateLastWord(' ')
                         break
                     self.printInfoDynamic()
                     self.textWin.noutrefresh()
                     curses.doupdate()
                     
-                self.goOn(typo, key, char, False)
+                self.goOn(skip, key, char, False)
 
             # We've completed a line, reflect this in the progress dict    
             self.progress['line'] = self.progress['line'] + 1
@@ -251,7 +250,7 @@ class Typing():
         info['WPM'] = round(self.getWPM(), 2)
         info['time'] = round(time.time() - self.progress['startTime'], 3)            
         info['charFreq'] = self.progress['charFreq']
-        info['typos'] = self.progress['typos']
+        info['skips'] = self.progress['skips']
         
         with open(self.fileName + '.speed', 'a') as f:
             json.dump(info, f)
@@ -316,24 +315,26 @@ class Typing():
                 style = curses.A_DIM
             self.textWin.addch(char, style)
 
-    def goOn(self, typo, key, char, rev):
-        if typo:
+    def goOn(self, skip, key, char, rev):
+        if skip:
             style = curses.A_UNDERLINE
             self.progress['errors'].append(self.progress['char'])
-            self.progress['typos'][ord(key)] = self.progress['typos'][ord(key)] + 1
+            self.progress['skips'][ord(key)] = self.progress['skips'][ord(key)] + 1
         elif rev:
             style = curses.A_REVERSE
         else:
             style = curses.A_DIM
+        if self.progress['clearLast']:
+            self.updateLastWord(' ')
 
         self.progress['sword'] += key
         self.progress['char'] += 1
         
         if char == ' ':
             self.progress['words'] = self.progress['words'] + 1
-            clearLast = True
+            self.progress['clearLast'] = True
         else:
-            clearLast = False
+            self.progress['clearLast'] = False
 
         self.textWin.addch(char, style)
         
